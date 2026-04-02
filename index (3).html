@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BIVI – Bilder & Videos | bivi.at</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,600&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --green:#31402C; --green-d:#1e2a1a; --green-l:#4a6042;
+      --cream:#f5f0e8; --warm:#ede6d6; --gold:#c9a84c; --gold-l:#e8c76a;
+      --white:#ffffff; --text:#1a1a1a; --text-m:#555; --text-l:#888;
+      --radius:4px; --font:'Barlow Semi Condensed',sans-serif; --font-b:'Barlow',sans-serif;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font-b); background:var(--cream); color:var(--text); overflow-x:hidden; }
+    ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:var(--cream);} ::-webkit-scrollbar-thumb{background:var(--green);border-radius:2px;}
+
+    /* LOADER */
+    #loader{position:fixed;inset:0;background:var(--green-d);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s,visibility .6s;}
+    #loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+    .loader-logo{font-family:var(--font);font-size:3rem;font-weight:800;letter-spacing:.12em;color:var(--cream);}
+    .loader-logo span{color:var(--gold);}
+    .loader-bar{width:180px;height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
+    .loader-bar-inner{height:100%;width:0;background:var(--gold);animation:load 1.6s ease forwards;}
+    @keyframes load{to{width:100%;}}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:800;padding:0 6vw;height:72px;display:flex;align-items:center;justify-content:space-between;transition:background .4s,box-shadow .4s;}
+    nav.scrolled{background:rgba(30,42,26,.92);backdrop-filter:blur(16px);box-shadow:0 2px 32px rgba(0,0,0,.18);}
+    .nav-logo{font-family:var(--font);font-size:1.5rem;font-weight:800;letter-spacing:.1em;color:var(--white);text-decoration:none;}
+    .nav-logo span{color:var(--gold);}
+    .nav-links{display:flex;gap:2.5rem;list-style:none;}
+    .nav-links a{font-family:var(--font);font-size:.95rem;font-weight:500;letter-spacing:.08em;color:rgba(255,255,255,.8);text-decoration:none;text-transform:uppercase;position:relative;transition:color .25s;}
+    .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1.5px;background:var(--gold);transform:scaleX(0);transform-origin:right;transition:transform .3s;}
+    .nav-links a:hover{color:var(--white);} .nav-links a:hover::after{transform:scaleX(1);transform-origin:left;}
+    .nav-cta{font-family:var(--font);font-size:.9rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:var(--green-d);border:none;padding:10px 22px;border-radius:var(--radius);cursor:pointer;transition:background .25s,transform .2s;}
+    .nav-cta:hover{background:var(--gold-l);transform:translateY(-1px);}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+    .hamburger span{display:block;width:24px;height:2px;background:var(--white);transition:.3s;}
+    .mobile-nav{display:none;position:fixed;inset:0;background:var(--green-d);z-index:700;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;}
+    .mobile-nav.open{display:flex;}
+    .mobile-nav a{font-family:var(--font);font-size:2.5rem;font-weight:700;letter-spacing:.1em;color:var(--cream);text-decoration:none;text-transform:uppercase;transition:color .2s;}
+    .mobile-nav a:hover{color:var(--gold);}
+
+    /* HERO */
+    #hero{min-height:100vh;background:var(--green-d);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 6vw;}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 20% 60%,rgba(201,168,76,.08) 0%,transparent 65%),radial-gradient(ellipse 50% 40% at 80% 30%,rgba(74,96,66,.35) 0%,transparent 60%),radial-gradient(ellipse 100% 80% at 50% 100%,rgba(49,64,44,.6) 0%,transparent 70%);}
+    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px;}
+    .hero-badge{display:inline-flex;align-items:center;gap:.6rem;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);border-radius:100px;font-family:var(--font);font-size:.85rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:6px 18px;margin-bottom:2rem;animation:fadeUp .8s ease both;}
+    h1.hero-title{font-family:var(--font);font-size:clamp(3.2rem,9vw,8.5rem);font-weight:900;line-height:.95;letter-spacing:-.01em;color:var(--white);animation:fadeUp .9s .1s ease both;}
+    h1.hero-title .accent{color:var(--gold);} h1.hero-title .italic{font-style:italic;font-weight:300;}
+    .hero-sub{max-width:540px;margin:1.6rem auto 0;font-size:1.1rem;font-weight:300;line-height:1.7;color:rgba(255,255,255,.55);animation:fadeUp 1s .2s ease both;}
+    .hero-actions{display:flex;gap:1rem;margin-top:2.8rem;justify-content:center;flex-wrap:wrap;animation:fadeUp 1s .35s ease both;}
+    .btn-primary{font-family:var(--font);font-size:1rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;background:var(--gold);color:var(--green-d);border:none;padding:14px 34px;border-radius:var(--radius);text-decoration:none;display:inline-flex;align-items:center;gap:.6rem;cursor:pointer;transition:background .25s,transform .2s,box-shadow .25s;}
+    .btn-primary:hover{background:var(--gold-l);transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,168,76,.3);}
+    .btn-outline{font-family:var(--font);font-size:1rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--white);border:1.5px solid rgba(255,255,255,.3);padding:13px 30px;border-radius:var(--radius);text-decoration:none;display:inline-flex;align-items:center;gap:.6rem;cursor:pointer;transition:border-color .25s,color .25s,transform .2s;}
+    .btn-outline:hover{border-color:var(--white);transform:translateY(-2px);}
+    .hero-scroll{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;color:rgba(255,255,255,.3);font-family:var(--font);font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;animation:fadeIn 1.2s .8s ease both;}
+    .hero-scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);animation:scrollP 2s 1.2s infinite;}
+    @keyframes scrollP{0%,100%{opacity:.4;}50%{opacity:1;}}
+    .hero-stats{position:absolute;bottom:4.5rem;right:6vw;display:flex;flex-direction:column;gap:1.5rem;animation:fadeLeft .9s .5s ease both;}
+    .hero-stat{text-align:right;} .hero-stat-num{font-family:var(--font);font-size:2.2rem;font-weight:800;color:var(--white);line-height:1;} .hero-stat-num span{color:var(--gold);}
+    .hero-stat-label{font-size:.75rem;font-weight:300;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;}
+
+    /* SHOWREEL */
+    #showreel{background:var(--green-d);padding:0 6vw 90px;}
+    .showreel-label{display:flex;align-items:center;justify-content:center;gap:.8rem;font-family:var(--font);font-size:.8rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2rem;padding-top:10px;}
+    .showreel-label::before,.showreel-label::after{content:'';flex:1;max-width:80px;height:1px;background:rgba(255,255,255,.1);}
+    .showreel-wrapper{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);max-width:960px;margin:0 auto;}
+    .showreel-mosaic{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:2px;z-index:0;}
+    .mc{display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:rgba(255,255,255,.08);}
+    .mc1{background:linear-gradient(135deg,#253320,#1a2618);} .mc2{background:linear-gradient(135deg,#2a3825,#31402C);}
+    .mc3{background:linear-gradient(135deg,#31402C,#1e2a1a);} .mc4{background:linear-gradient(135deg,#1e2a1a,#3a4e35);}
+    .mc5{background:linear-gradient(135deg,#3a4e35,#253320);} .mc6{background:linear-gradient(135deg,#4a6042,#1a2618);}
+    #showreelVideo{width:100%;aspect-ratio:16/9;display:block;object-fit:cover;position:relative;z-index:1;}
+    .showreel-poster{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.8rem;background:linear-gradient(135deg,rgba(30,42,26,.88),rgba(49,64,44,.72));backdrop-filter:blur(2px);cursor:pointer;transition:opacity .4s;}
+    .showreel-poster.hidden{opacity:0;pointer-events:none;}
+    .play-btn{width:84px;height:84px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--green-d);box-shadow:0 0 0 16px rgba(201,168,76,.15),0 0 0 32px rgba(201,168,76,.07);transition:transform .3s,background .2s,box-shadow .3s;}
+    .showreel-poster:hover .play-btn{transform:scale(1.1);background:var(--gold-l);box-shadow:0 0 0 20px rgba(201,168,76,.2),0 0 0 40px rgba(201,168,76,.08);}
+    .play-btn i{margin-left:5px;}
+    .showreel-poster-title{font-family:var(--font);font-size:1.6rem;font-weight:700;color:var(--white);letter-spacing:.05em;}
+    .showreel-poster-sub{font-size:.9rem;color:rgba(255,255,255,.5);font-weight:300;}
+    .video-controls{position:absolute;bottom:0;left:0;right:0;padding:1rem 1.4rem;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);display:none;align-items:center;gap:1rem;z-index:3;}
+    .showreel-wrapper:hover .video-controls{display:flex;}
+    .vc-btn{background:none;border:none;color:#fff;font-size:1rem;cursor:pointer;transition:color .2s;padding:4px;} .vc-btn:hover{color:var(--gold);}
+    .vc-progress{flex:1;height:3px;background:rgba(255,255,255,.2);border-radius:2px;cursor:pointer;position:relative;}
+    .vc-progress-fill{height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width .3s linear;}
+    .vc-time{font-family:var(--font);font-size:.78rem;color:rgba(255,255,255,.6);white-space:nowrap;}
+
+    /* MARQUEE */
+    .marquee-section{background:var(--green);padding:18px 0;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);}
+    .marquee-track{display:flex;gap:4rem;align-items:center;animation:marquee 22s linear infinite;white-space:nowrap;}
+    .marquee-item{font-family:var(--font);font-size:1rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:1rem;flex-shrink:0;}
+    .marquee-item i{color:var(--gold);font-size:.6rem;}
+    @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+    /* SECTIONS */
+    section{padding:110px 6vw;}
+    .section-tag{display:inline-flex;align-items:center;gap:.6rem;color:var(--gold);font-family:var(--font);font-size:.8rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1rem;}
+    .section-tag::before{content:'';display:block;width:28px;height:1.5px;background:var(--gold);}
+    h2.section-title{font-family:var(--font);font-size:clamp(2.2rem,5vw,4rem);font-weight:800;line-height:1;letter-spacing:-.01em;color:var(--text);}
+    h2.section-title.light{color:var(--white);} h2.section-title em{font-style:italic;font-weight:300;color:var(--green);} h2.section-title.light em{color:var(--gold);}
+
+    /* ABOUT */
+    #about{background:var(--cream);}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-top:4rem;}
+    .about-visual{position:relative;}
+    .about-img-box{aspect-ratio:4/5;background:var(--green);border-radius:6px;overflow:hidden;position:relative;}
+    .about-img-inner{width:100%;height:100%;background:linear-gradient(135deg,var(--green-l),var(--green-d));display:flex;align-items:center;justify-content:center;}
+    .about-img-inner i{font-size:5rem;color:rgba(255,255,255,.12);}
+    .about-float-card{position:absolute;bottom:-1.5rem;right:-1.5rem;background:var(--white);border-radius:6px;padding:1.4rem 1.8rem;box-shadow:0 12px 40px rgba(0,0,0,.1);text-align:center;}
+    .about-float-num{font-family:var(--font);font-size:2.4rem;font-weight:900;color:var(--green);line-height:1;}
+    .about-float-label{font-size:.8rem;color:var(--text-l);text-transform:uppercase;letter-spacing:.1em;margin-top:.3rem;font-family:var(--font);}
+    .about-dots{position:absolute;top:-1.5rem;left:-1.5rem;width:80px;height:80px;background-image:radial-gradient(var(--gold) 1.5px,transparent 1.5px);background-size:12px 12px;opacity:.5;}
+    .about-text p{font-size:1.05rem;line-height:1.8;color:var(--text-m);font-weight:300;margin-bottom:1.2rem;}
+    .about-values{margin-top:2rem;display:flex;flex-direction:column;gap:.8rem;}
+    .about-value{display:flex;align-items:center;gap:.9rem;font-family:var(--font);font-size:1.05rem;font-weight:500;color:var(--text);}
+    .about-value i{color:var(--gold);font-size:.9rem;width:20px;text-align:center;}
+
+    /* SERVICES CAROUSEL */
+    #services{background:var(--green-d);overflow:hidden;}
+    .services-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3rem;flex-wrap:wrap;gap:2rem;}
+    .services-header p{max-width:380px;font-size:1rem;line-height:1.7;color:rgba(255,255,255,.45);font-weight:300;}
+    .carousel-scene{perspective:1400px;width:100%;height:400px;position:relative;margin:0 auto 2rem;}
+    .carousel-track{width:100%;height:100%;position:relative;transform-style:preserve-3d;}
+    .carousel-slide{position:absolute;width:280px;height:360px;top:50%;left:50%;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 20px 60px rgba(0,0,0,.5);transition:all .5s cubic-bezier(.25,.46,.45,.94);}
+    .slide-top{width:100%;height:65%;display:flex;align-items:center;justify-content:center;font-size:3.2rem;color:rgba(255,255,255,.2);}
+    .slide-info{padding:1.2rem 1.4rem;background:rgba(20,30,18,.95);height:35%;}
+    .slide-cat{font-family:var(--font);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.3rem;}
+    .slide-name{font-family:var(--font);font-size:1.05rem;font-weight:700;color:var(--white);margin-bottom:.3rem;line-height:1.2;}
+    .slide-desc{font-size:.78rem;color:rgba(255,255,255,.4);font-weight:300;line-height:1.45;}
+    .carousel-nav{display:flex;align-items:center;justify-content:center;gap:1.5rem;margin-top:.5rem;}
+    .carousel-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s,transform .2s;}
+    .carousel-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.12);color:var(--gold);transform:scale(1.05);}
+    .carousel-dots{display:flex;gap:.5rem;}
+    .carousel-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:background .25s,transform .25s;}
+    .carousel-dot.active{background:var(--gold);transform:scale(1.3);}
+
+    /* PROCESS */
+    #process{background:var(--warm);}
+    .process-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;margin-top:4rem;position:relative;}
+    .process-steps::before{content:'';position:absolute;top:2.4rem;left:10%;right:10%;height:1px;background:linear-gradient(to right,transparent,var(--green-l),transparent);}
+    .process-step{text-align:center;}
+    .process-num{width:48px;height:48px;margin:0 auto 1.4rem;border-radius:50%;background:var(--green);color:var(--white);font-family:var(--font);font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+    .process-step-title{font-family:var(--font);font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.5rem;}
+    .process-step-desc{font-size:.88rem;line-height:1.65;color:var(--text-m);font-weight:300;}
+
+    /* PORTFOLIO */
+    #portfolio{background:var(--cream);}
+    .portfolio-filter{display:flex;gap:.6rem;flex-wrap:wrap;margin:2.5rem 0 3rem;}
+    .filter-btn{font-family:var(--font);font-size:.85rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background:transparent;color:var(--text-m);border:1.5px solid rgba(0,0,0,.12);padding:8px 18px;border-radius:3px;transition:.2s;}
+    .filter-btn.active,.filter-btn:hover{background:var(--green);color:var(--white);border-color:var(--green);}
+    .portfolio-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:220px;gap:1rem;}
+    .portfolio-item{border-radius:5px;overflow:hidden;position:relative;cursor:pointer;transition:opacity .35s,transform .35s;}
+    .portfolio-item.hidden{display:none;}
+    .portfolio-item.span-7{grid-column:span 7;grid-row:span 2;}
+    .portfolio-item.span-6{grid-column:span 6;}
+    .portfolio-item.span-5{grid-column:span 5;}
+    .portfolio-item.span-4{grid-column:span 4;}
+    .portfolio-item.span-12{grid-column:span 12;}
+    .p-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform .5s;}
+    .portfolio-item:hover .p-bg{transform:scale(1.05);}
+    .p-bg i{font-size:3rem;color:rgba(255,255,255,.12);}
+    .p-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(30,42,26,.9) 0%,rgba(30,42,26,.1) 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:1.6rem;opacity:0;transition:opacity .3s;}
+    .portfolio-item:hover .p-overlay{opacity:1;}
+    .p-cat{font-family:var(--font);font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;}
+    .p-name{font-family:var(--font);font-size:1.2rem;font-weight:700;color:var(--white);}
+    .g1{background:linear-gradient(135deg,#2a3825,#1a2618);} .g2{background:linear-gradient(135deg,#3a4e35,#253320);}
+    .g3{background:linear-gradient(135deg,#1e2a1a,#31402C);} .g4{background:linear-gradient(135deg,#4a6042,#2a3825);}
+    .g5{background:linear-gradient(135deg,#263520,#31402C);} .g6{background:linear-gradient(135deg,#31402C,#1a2618);}
+    .g7{background:linear-gradient(135deg,#1a3020,#31402C);} .g8{background:linear-gradient(135deg,#2c3d28,#192214);}
+
+    /* LIGHTBOX */
+    .lightbox{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.9);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
+    .lightbox.open{display:flex;}
+    .lightbox-inner{background:var(--green-d);border-radius:10px;padding:2.5rem;max-width:680px;width:90%;position:relative;text-align:center;}
+    .lb-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:rgba(255,255,255,.5);font-size:1.4rem;cursor:pointer;transition:color .2s;} .lb-close:hover{color:var(--white);}
+    .lb-img{width:100%;aspect-ratio:16/9;border-radius:8px;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;font-size:4rem;color:rgba(255,255,255,.15);}
+    .lb-cat{font-family:var(--font);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;}
+    .lb-title{font-family:var(--font);font-size:1.6rem;font-weight:700;color:var(--white);margin-bottom:.6rem;}
+    .lb-desc{font-size:.9rem;color:rgba(255,255,255,.45);font-weight:300;line-height:1.6;}
+
+    /* WHY */
+    #why{background:var(--green);}
+    .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-top:4rem;}
+    .why-points{display:flex;flex-direction:column;gap:2rem;}
+    .why-point{display:flex;gap:1.4rem;align-items:flex-start;}
+    .why-icon{width:44px;height:44px;border-radius:50%;flex-shrink:0;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--gold);transition:background .3s,transform .3s;}
+    .why-point:hover .why-icon{background:rgba(201,168,76,.3);transform:scale(1.1);}
+    .why-point-title{font-family:var(--font);font-size:1.15rem;font-weight:700;color:var(--white);margin-bottom:.35rem;}
+    .why-point-desc{font-size:.9rem;line-height:1.7;color:rgba(255,255,255,.45);font-weight:300;}
+    .why-visual{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:3rem;display:flex;flex-direction:column;gap:1.8rem;}
+    .why-stat-row{display:flex;gap:2rem;} .why-big-stat{flex:1;}
+    .why-big-num{font-family:var(--font);font-size:3.5rem;font-weight:900;line-height:1;color:var(--white);} .why-big-num span{color:var(--gold);}
+    .why-big-label{font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-top:.4rem;font-family:var(--font);}
+    .why-divider{height:1px;background:rgba(255,255,255,.08);}
+    .why-cta-box{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:1.4rem;}
+    .why-cta-box p{font-size:.9rem;color:rgba(255,255,255,.55);margin-bottom:1rem;font-weight:300;}
+
+    /* TESTIMONIALS */
+    #testimonials{background:var(--cream);}
+    .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:4rem;}
+    .testimonial-card{background:var(--white);border-radius:6px;padding:2.2rem;border:1px solid rgba(0,0,0,.06);transition:transform .3s,box-shadow .3s;}
+    .testimonial-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.08);}
+    .t-quote{font-size:2rem;color:var(--gold);font-family:Georgia,serif;line-height:1;margin-bottom:1rem;}
+    .t-text{font-size:.95rem;line-height:1.75;color:var(--text-m);font-weight:300;margin-bottom:1.6rem;}
+    .t-author{display:flex;align-items:center;gap:.9rem;}
+    .t-avatar{width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:1.1rem;font-weight:700;color:var(--white);}
+    .t-name{font-family:var(--font);font-size:1rem;font-weight:700;color:var(--text);}
+    .t-role{font-size:.8rem;color:var(--text-l);margin-top:.1rem;}
+    .t-stars{color:var(--gold);font-size:.75rem;margin-bottom:.4rem;}
+
+    /* PRICING */
+    #pricing{background:var(--warm);}
+    .pricing-note{font-size:.92rem;color:var(--text-l);margin-top:.5rem;font-weight:300;}
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:4rem;}
+    .pricing-card{border-radius:6px;padding:2.5rem;border:1.5px solid rgba(0,0,0,.1);background:var(--white);position:relative;transition:transform .3s,box-shadow .3s;}
+    .pricing-card.featured{background:var(--green-d);border-color:var(--green-d);transform:scale(1.03);}
+    .pricing-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.1);}
+    .pricing-card.featured:hover{transform:translateY(-4px) scale(1.03);}
+    .pricing-badge{position:absolute;top:1.4rem;right:1.4rem;background:var(--gold);color:var(--green-d);font-family:var(--font);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:3px;}
+    .pricing-tier{font-family:var(--font);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+    .pricing-name{font-family:var(--font);font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:1.2rem;}
+    .pricing-card.featured .pricing-name{color:var(--white);}
+    .pricing-price{font-family:var(--font);font-size:2.8rem;font-weight:900;line-height:1;color:var(--green-d);}
+    .pricing-card.featured .pricing-price{color:var(--white);}
+    .pricing-price small{font-size:1rem;font-weight:400;color:var(--text-l);}
+    .pricing-card.featured .pricing-price small{color:rgba(255,255,255,.4);}
+    .p-divider{height:1px;background:rgba(0,0,0,.07);margin:1.5rem 0;}
+    .pricing-card.featured .p-divider{background:rgba(255,255,255,.1);}
+    .pricing-features{display:flex;flex-direction:column;gap:.7rem;margin-bottom:2rem;}
+    .pricing-feature{display:flex;align-items:center;gap:.7rem;font-size:.9rem;color:var(--text-m);}
+    .pricing-card.featured .pricing-feature{color:rgba(255,255,255,.6);}
+    .pricing-feature i{color:var(--green);font-size:.8rem;}
+    .pricing-card.featured .pricing-feature i{color:var(--gold);}
+    .btn-pricing{width:100%;font-family:var(--font);font-size:.95rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:13px;border-radius:var(--radius);border:1.5px solid var(--green);background:transparent;color:var(--green);transition:.25s;}
+    .btn-pricing:hover{background:var(--green);color:var(--white);}
+    .pricing-card.featured .btn-pricing{background:var(--gold);border-color:var(--gold);color:var(--green-d);}
+    .pricing-card.featured .btn-pricing:hover{background:var(--gold-l);}
+
+    /* CONTACT */
+    #contact{background:var(--green-d);}
+    .contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:5rem;margin-top:4rem;align-items:start;}
+    .contact-info{display:flex;flex-direction:column;gap:2.5rem;}
+    .contact-item{display:flex;gap:1.2rem;align-items:flex-start;}
+    .c-icon{width:46px;height:46px;border-radius:6px;flex-shrink:0;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--gold);}
+    .c-label{font-family:var(--font);font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:.3rem;}
+    .c-value{font-family:var(--font);font-size:1rem;font-weight:500;color:var(--white);}
+    .contact-form{display:flex;flex-direction:column;gap:1rem;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .form-group{display:flex;flex-direction:column;gap:.5rem;}
+    .form-label{font-family:var(--font);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);font-weight:500;}
+    .form-input,.form-select,.form-textarea{font-family:var(--font-b);font-size:.95rem;font-weight:300;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:var(--white);padding:12px 16px;border-radius:var(--radius);outline:none;transition:border-color .25s,background .25s;}
+    .form-input::placeholder,.form-textarea::placeholder{color:rgba(255,255,255,.2);}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);background:rgba(255,255,255,.08);}
+    .form-textarea{resize:vertical;min-height:120px;}
+    .form-select option{background:var(--green-d);color:var(--white);}
+    .form-submit{font-family:var(--font);font-size:1rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background:var(--gold);color:var(--green-d);border:none;padding:15px 28px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;gap:.6rem;transition:background .25s,transform .2s;}
+    .form-submit:hover{background:var(--gold-l);transform:translateY(-2px);}
+    .form-success{display:none;text-align:center;padding:3rem;color:var(--white);}
+    .form-success i{font-size:3rem;color:var(--gold);margin-bottom:1rem;display:block;}
+    .form-success h3{font-family:var(--font);font-size:1.5rem;font-weight:700;margin-bottom:.5rem;}
+    .form-success p{color:rgba(255,255,255,.5);font-weight:300;}
+
+    /* FOOTER */
+    footer{background:var(--green-d);border-top:1px solid rgba(255,255,255,.07);padding:4rem 6vw 2.5rem;}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;}
+    .footer-brand p{font-size:.88rem;line-height:1.7;color:rgba(255,255,255,.35);font-weight:300;margin-top:1rem;max-width:260px;}
+    .footer-social{display:flex;gap:.8rem;margin-top:1.4rem;}
+    .footer-social a{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:.9rem;text-decoration:none;transition:border-color .25s,color .25s;}
+    .footer-social a:hover{border-color:var(--gold);color:var(--gold);}
+    .footer-col h4{font-family:var(--font);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1.2rem;}
+    .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:.7rem;}
+    .footer-col ul a{font-size:.88rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s;font-weight:300;}
+    .footer-col ul a:hover{color:var(--white);}
+    .footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:1.8rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+    .footer-bottom p{font-size:.8rem;color:rgba(255,255,255,.25);font-weight:300;}
+    .footer-bottom-links{display:flex;gap:1.4rem;}
+    .footer-bottom-links a{font-size:.8rem;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+    .footer-bottom-links a:hover{color:rgba(255,255,255,.5);}
+
+    /* ANIMATIONS */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    @keyframes fadeLeft{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+    .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s;}
+    .reveal.visible{opacity:1;transform:translateY(0);}
+    .reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .7s,transform .7s;}
+    .reveal-left.visible{opacity:1;transform:translateX(0);}
+    .reveal-right{opacity:0;transform:translateX(30px);transition:opacity .7s,transform .7s;}
+    .reveal-right.visible{opacity:1;transform:translateX(0);}
+    .reveal-scale{opacity:0;transform:scale(.94);transition:opacity .6s,transform .6s;}
+    .reveal-scale.visible{opacity:1;transform:scale(1);}
+    .d1{transition-delay:.05s;} .d2{transition-delay:.12s;} .d3{transition-delay:.2s;}
+    .d4{transition-delay:.28s;} .d5{transition-delay:.36s;} .d6{transition-delay:.44s;}
+
+    /* RESPONSIVE */
+    @media(max-width:1024px){
+      .about-grid,.why-grid,.contact-grid{grid-template-columns:1fr;gap:3rem;}
+      .portfolio-item.span-7{grid-column:span 12;grid-row:span 1;}
+      .portfolio-item.span-5{grid-column:span 6;}
+      .portfolio-item.span-4{grid-column:span 4;}
+      .footer-grid{grid-template-columns:1fr 1fr;}
+      .hero-stats{display:none;}
+    }
+    @media(max-width:768px){
+      nav .nav-links,nav .nav-cta{display:none;}
+      .hamburger{display:flex;}
+      section{padding:80px 5vw;}
+      #showreel{padding:0 5vw 70px;}
+      .portfolio-grid{grid-template-columns:1fr 1fr;grid-auto-rows:180px;}
+      .portfolio-item{grid-column:span 1!important;grid-row:span 1!important;}
+      .form-row{grid-template-columns:1fr;}
+      .footer-grid{grid-template-columns:1fr;gap:2rem;}
+      h1.hero-title{font-size:clamp(2.8rem,10vw,5rem);}
+      .pricing-card.featured{transform:scale(1);}
+      .process-steps::before{display:none;}
+      .why-stat-row{flex-direction:column;gap:1rem;}
+      .carousel-scene{height:340px;}
+    }
+    @media(max-width:480px){
+      .portfolio-grid{grid-template-columns:1fr;}
+      .services-header{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">BI<span>VI</span></div>
+  <div class="loader-bar"><div class="loader-bar-inner"></div></div>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#about" onclick="closeMobile()">Über uns</a>
+  <a href="#services" onclick="closeMobile()">Leistungen</a>
+  <a href="#portfolio" onclick="closeMobile()">Portfolio</a>
+  <a href="#pricing" onclick="closeMobile()">Preise</a>
+  <a href="#contact" onclick="closeMobile()">Kontakt</a>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="https://bivi.at" class="nav-logo">BI<span>VI</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">Über uns</a></li>
+    <li><a href="#services">Leistungen</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#process">Ablauf</a></li>
+    <li><a href="#pricing">Preise</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.querySelector('#contact').scrollIntoView({behavior:'smooth'})">Anfrage stellen</button>
+  <button class="hamburger" id="hamburger" onclick="toggleMobile()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-badge"><i class="fa-solid fa-location-dot"></i> Wien, Österreich · bivi.at</div>
+  <h1 class="hero-title">Visuelle<br><span class="accent">Kraft</span> für<br><span class="italic">Ihr Business.</span></h1>
+  <p class="hero-sub">Professionelle Foto- und Videoproduktion für Wiener Unternehmen. Wir verwandeln Ihre Marke in unvergessliche Bilder.</p>
+  <div class="hero-actions">
+    <a href="#showreel" class="btn-primary"><i class="fa-solid fa-play"></i> Showreel ansehen</a>
+    <a href="#contact" class="btn-outline"><i class="fa-regular fa-paper-plane"></i> Kostenloses Erstgespräch</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">100<span>%</span></div><div class="hero-stat-label">Kundenzufriedenheit</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">48<span>h</span></div><div class="hero-stat-label">Lieferzeit</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4K<span>+</span></div><div class="hero-stat-label">Auflösung</div></div>
+  </div>
+  <div class="hero-scroll"><span>Mehr entdecken</span><div class="hero-scroll-line"></div></div>
+</section>
+
+<!-- SHOWREEL -->
+<div id="showreel">
+  <div class="showreel-label">Showreel 2025</div>
+  <div class="showreel-wrapper reveal">
+    <!-- Mosaic background -->
+    <div class="showreel-mosaic">
+      <div class="mc mc1"><i class="fa-solid fa-building"></i></div>
+      <div class="mc mc2"><i class="fa-solid fa-video"></i></div>
+      <div class="mc mc3"><i class="fa-solid fa-drone"></i></div>
+      <div class="mc mc4"><i class="fa-solid fa-camera"></i></div>
+      <div class="mc mc5"><i class="fa-brands fa-instagram"></i></div>
+      <div class="mc mc6"><i class="fa-solid fa-film"></i></div>
+    </div>
+    <!-- Video — replace src with bivi.at hosted file -->
+    <video id="showreelVideo" class="showreel-video" preload="metadata" playsinline loop style="position:relative;z-index:1;">
+      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+    </video>
+    <!-- Poster overlay -->
+    <div class="showreel-poster" id="showreelPoster" onclick="playShowreel()">
+      <div class="play-btn"><i class="fa-solid fa-play"></i></div>
+      <div class="showreel-poster-title">Unser Showreel 2025</div>
+      <div class="showreel-poster-sub">Immobilien · Werbung · Drohne · Events · Social Media</div>
+    </div>
+    <!-- Controls -->
+    <div class="video-controls" id="videoControls">
+      <button class="vc-btn" id="vcPlayPause" onclick="toggleVideoPlay()"><i class="fa-solid fa-pause"></i></button>
+      <div class="vc-progress" onclick="seekVideo(event)"><div class="vc-progress-fill" id="vcProgress"></div></div>
+      <span class="vc-time" id="vcTime">0:00</span>
+      <button class="vc-btn" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="vcMuteIcon"></i></button>
+      <button class="vc-btn" onclick="toggleFullscreen()"><i class="fa-solid fa-expand"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Immobilienfotografie</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Werbevideos</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Drohnenaufnahmen</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Social Media Content</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Corporate Photography</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Produktfotografie</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Eventfotografie</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Imagefilm</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Immobilienfotografie</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Werbevideos</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Drohnenaufnahmen</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Social Media Content</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Corporate Photography</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Produktfotografie</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Eventfotografie</div>
+    <div class="marquee-item"><i class="fa-solid fa-circle"></i> Imagefilm</div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-visual reveal-left">
+      <div class="about-dots"></div>
+      <div class="about-img-box">
+        <div class="about-img-inner"><i class="fa-solid fa-camera"></i></div>
+      </div>
+      <div class="about-float-card">
+        <div class="about-float-num">★ 5.0</div>
+        <div class="about-float-label">Google Bewertung</div>
+      </div>
+    </div>
+    <div class="about-text">
+      <div class="section-tag reveal d1">Über BIVI</div>
+      <h2 class="section-title reveal d2">Wir sind<br><em>Ihr kreatives Team</em><br>in Wien.</h2>
+      <div class="reveal d3">
+        <p>BIVI – Bilder &amp; Videos ist eine junge, leidenschaftliche Agentur aus Wien, gegründet von kreativen Köpfen mit einem Gespür für Ästhetik und einem Herz für unsere Kunden.</p>
+        <p>Wir glauben daran, dass großartige Bilder Geschichten erzählen, Vertrauen aufbauen und Marken unvergesslich machen. Deshalb behandeln wir jedes Projekt wie unser eigenes.</p>
+        <p>Ob Immobilien, Werbung, Events oder Corporate Content – wir sind dabei.</p>
+      </div>
+      <div class="about-values reveal d4">
+        <div class="about-value"><i class="fa-solid fa-check"></i> Persönliche Betreuung von Anfang bis Ende</div>
+        <div class="about-value"><i class="fa-solid fa-check"></i> Modernste Kamera- &amp; Drohnentechnik</div>
+        <div class="about-value"><i class="fa-solid fa-check"></i> Lieferung in 48 Stunden</div>
+        <div class="about-value"><i class="fa-solid fa-check"></i> Faire, transparente Preise</div>
+        <div class="about-value"><i class="fa-solid fa-check"></i> Qualität, die begeistert</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES — 3D CAROUSEL -->
+<section id="services">
+  <div class="services-header">
+    <div>
+      <div class="section-tag reveal" style="color:var(--gold-l)">Leistungen</div>
+      <h2 class="section-title light reveal d1">Was wir<br><em>für Sie tun.</em></h2>
+    </div>
+    <p class="reveal d2">Von der ersten Idee bis zum finalen Schnitt – alles aus einer Hand, direkt in Wien.</p>
+  </div>
+  <div class="carousel-scene reveal">
+    <div class="carousel-track" id="carouselTrack"></div>
+  </div>
+  <div class="carousel-nav">
+    <button class="carousel-btn" onclick="carouselPrev()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="carousel-dots" id="carouselDots"></div>
+    <button class="carousel-btn" onclick="carouselNext()"><i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="section-tag reveal">Unser Ablauf</div>
+  <h2 class="section-title reveal d1">Einfach. <em>Unkompliziert.</em> Schnell.</h2>
+  <div class="process-steps">
+    <div class="process-step reveal d1"><div class="process-num">01</div><div class="process-step-title">Erstgespräch</div><p class="process-step-desc">Kostenlos und unverbindlich. Wir lernen Sie kennen, verstehen Ihre Ziele und beraten Sie ehrlich.</p></div>
+    <div class="process-step reveal d2"><div class="process-num">02</div><div class="process-step-title">Angebot &amp; Planung</div><p class="process-step-desc">Sie erhalten ein maßgeschneidertes Angebot. Wir planen alles – Timing, Location, Konzept.</p></div>
+    <div class="process-step reveal d3"><div class="process-num">03</div><div class="process-step-title">Shooting &amp; Produktion</div><p class="process-step-desc">Der kreative Part! Wir arbeiten professionell, entspannt und mit vollem Einsatz für Ihr Ergebnis.</p></div>
+    <div class="process-step reveal d4"><div class="process-num">04</div><div class="process-step-title">Bearbeitung &amp; Lieferung</div><p class="process-step-desc">Professionelle Nachbearbeitung und Lieferung innerhalb von 48 Stunden via Download-Link.</p></div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section id="portfolio">
+  <div class="section-tag reveal">Portfolio</div>
+  <h2 class="section-title reveal d1">Unsere <em>Arbeiten.</em></h2>
+  <div class="portfolio-filter reveal d2">
+    <button class="filter-btn active" data-filter="all">Alle</button>
+    <button class="filter-btn" data-filter="immobilien">Immobilien</button>
+    <button class="filter-btn" data-filter="werbung">Werbung</button>
+    <button class="filter-btn" data-filter="drohne">Drohne</button>
+    <button class="filter-btn" data-filter="produkt">Produkte</button>
+    <button class="filter-btn" data-filter="event">Events</button>
+  </div>
+  <div class="portfolio-grid" id="portfolioGrid">
+    <div class="portfolio-item" data-cat="immobilien" onclick="openLightbox(this)">
+      <div class="p-bg g1"><i class="fa-solid fa-building"></i></div>
+      <div class="p-overlay"><div class="p-cat">Immobilien</div><div class="p-name">Penthouse Wien 1., Drohnenaufnahme</div></div>
+    </div>
+    <div class="portfolio-item" data-cat="werbung" onclick="openLightbox(this)">
+      <div class="p-bg g2"><i class="fa-solid fa-video"></i></div>
+      <div class="p-overlay"><div class="p-cat">Werbung</div><div class="p-name">Café Mitte – Imagefilm</div></div>
+    </div>
+    <div class="portfolio-item" data-cat="drohne" onclick="openLightbox(this)">
+      <div class="p-bg g3"><i class="fa-solid fa-drone"></i></div>
+      <div class="p-overlay"><div class="p-cat">Drohne</div><div class="p-name">Villenviertel Grinzing, 4K</div></div>
+    </div>
+    <div class="portfolio-item" data-cat="produkt" onclick="openLightbox(this)">
+      <div class="p-bg g4"><i class="fa-solid fa-box-open"></i></div>
+      <div class="p-overlay"><div class="p-cat">Produkt</div><div class="p-name">Kosmetik Studio Serie</div></div>
+    </div>
+    <div class="portfolio-item" data-cat="event" onclick="openLightbox(this)">
+      <div class="p-bg g5"><i class="fa-solid fa-users"></i></div>
+      <div class="p-overlay"><div class="p-cat">Event</div><div class="p-name">Wiener Startup Summit 2024</div></div>
+    </div>
+    <div class="portfolio-item" data-cat="werbung" onclick="openLightbox(this)">
+      <div class="p-bg g6"><i class="fa-brands fa-instagram"></i></div>
+      <div class="p-overlay"><div class="p-cat">Werbung</div><div class="p-name">Reels-Paket Fitnessstudio</div></div>
+    </div>
+    <div class="portfolio-item" data-cat="immobilien" onclick="openLightbox(this)">
+      <div class="p-bg g7"><i class="fa-solid fa-house"></i></div>
+      <div class="p-overlay"><div class="p-cat">Immobilien</div><div class="p-name">Luxus-Apartment Döbling</div></div>
+    </div>
+    <div class="portfolio-item" data-cat="event" onclick="openLightbox(this)">
+      <div class="p-bg g8"><i class="fa-solid fa-champagne-glasses"></i></div>
+      <div class="p-overlay"><div class="p-cat">Event</div><div class="p-name">Firmenjubiläum 50 Jahre</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="lbBgClick(event)">
+  <div class="lightbox-inner">
+    <button class="lb-close" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="lb-img" id="lbImg"></div>
+    <div class="lb-cat" id="lbCat"></div>
+    <div class="lb-title" id="lbTitle"></div>
+    <div class="lb-desc" id="lbDesc"></div>
+  </div>
+</div>
+
+<!-- WHY US -->
+<section id="why">
+  <div class="why-grid">
+    <div>
+      <div class="section-tag reveal" style="color:var(--gold-l)">Warum BIVI</div>
+      <h2 class="section-title light reveal d1">Was uns <em>besonders</em> macht.</h2>
+      <div class="why-points" style="margin-top:2.5rem">
+        <div class="why-point reveal d2"><div class="why-icon"><i class="fa-solid fa-heart"></i></div><div><div class="why-point-title">Familiär &amp; persönlich</div><p class="why-point-desc">Bei uns sind Sie keine Nummer. Wir nehmen uns Zeit für Sie, hören zu und begleiten Sie durch den gesamten Prozess.</p></div></div>
+        <div class="why-point reveal d3"><div class="why-icon"><i class="fa-solid fa-medal"></i></div><div><div class="why-point-title">Kompromisslose Qualität</div><p class="why-point-desc">Modernste Ausrüstung, erfahrene Fotografen und ein scharfes Auge für Details – für Ergebnisse, die begeistern.</p></div></div>
+        <div class="why-point reveal d4"><div class="why-icon"><i class="fa-solid fa-bolt"></i></div><div><div class="why-point-title">Schnell &amp; zuverlässig</div><p class="why-point-desc">Lieferung in 48 Stunden nach dem Shooting. Pünktlich, verlässlich – wie es Wien verdient.</p></div></div>
+        <div class="why-point reveal d5"><div class="why-icon"><i class="fa-solid fa-euro-sign"></i></div><div><div class="why-point-title">Faire Preise</div><p class="why-point-desc">Transparent, verständlich und ohne versteckte Kosten. Qualität muss nicht teuer sein.</p></div></div>
+      </div>
+    </div>
+    <div class="why-visual reveal-right d2">
+      <div class="why-stat-row">
+        <div class="why-big-stat"><div class="why-big-num">48<span>h</span></div><div class="why-big-label">Lieferzeit</div></div>
+        <div class="why-big-stat"><div class="why-big-num">4K<span>+</span></div><div class="why-big-label">Auflösung</div></div>
+      </div>
+      <div class="why-divider"></div>
+      <div class="why-stat-row">
+        <div class="why-big-stat"><div class="why-big-num">100<span>%</span></div><div class="why-big-label">Zufriedenheitsgarantie</div></div>
+        <div class="why-big-stat"><div class="why-big-num">∞</div><div class="why-big-label">Kreativität</div></div>
+      </div>
+      <div class="why-divider"></div>
+      <div class="why-cta-box">
+        <p>Starten Sie noch heute mit einem kostenlosen Erstgespräch und entdecken Sie, was BIVI für Ihre Marke tun kann.</p>
+        <a href="#contact" class="btn-primary" style="font-size:.9rem;padding:11px 22px"><i class="fa-regular fa-calendar"></i> Termin vereinbaren</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-tag reveal">Kundenstimmen</div>
+  <h2 class="section-title reveal d1">Das sagen <em>unsere Kunden.</em></h2>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal d1"><div class="t-quote">"</div><div class="t-stars">★★★★★</div><p class="t-text">BIVI hat unsere Immobilien in ein völlig neues Licht gerückt. Die Anfragen haben sich nach den neuen Fotos verdreifacht. Absolut beeindruckende Arbeit!</p><div class="t-author"><div class="t-avatar">MK</div><div><div class="t-name">Markus Kellner</div><div class="t-role">Immobilienmakler, Wien 1.</div></div></div></div>
+    <div class="testimonial-card reveal d2"><div class="t-quote">"</div><div class="t-stars">★★★★★</div><p class="t-text">Der Imagefilm, den BIVI für uns produziert hat, ist einfach fantastisch. Das Team war super professionell, unkompliziert und hat genau verstanden, was wir wollten.</p><div class="t-author"><div class="t-avatar">SV</div><div><div class="t-name">Sophie Varga</div><div class="t-role">Geschäftsführerin, Café Mitte</div></div></div></div>
+    <div class="testimonial-card reveal d3"><div class="t-quote">"</div><div class="t-stars">★★★★★</div><p class="t-text">Tolle Drohnenaufnahmen für unser Bauprojekt. Schnelle Lieferung, faire Preise und ein super nettes Team. Werden wir definitiv wieder beauftragen!</p><div class="t-author"><div class="t-avatar">TH</div><div><div class="t-name">Thomas Huber</div><div class="t-role">Projektleiter, Wohnbau GmbH</div></div></div></div>
+    <div class="testimonial-card reveal d4"><div class="t-quote">"</div><div class="t-stars">★★★★★</div><p class="t-text">Unsere Produkte sehen auf den Fotos unglaublich aus. BIVI versteht es, den Charakter eines Produkts einzufangen. Unsere Conversion Rate ist merklich gestiegen.</p><div class="t-author"><div class="t-avatar">LB</div><div><div class="t-name">Lena Brauer</div><div class="t-role">Inhaberin, L'Essence Kosmetik</div></div></div></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-tag reveal">Preise</div>
+  <h2 class="section-title reveal d1">Transparent. <em>Fair. Klar.</em></h2>
+  <p class="pricing-note reveal d2">Alle Preise inkl. Bearbeitung. Individuelle Pakete auf Anfrage.</p>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal d1">
+      <div class="pricing-tier">Starter</div>
+      <div class="pricing-name">Basis Paket</div>
+      <div class="pricing-price">ab €199<small> / Projekt</small></div>
+      <div class="p-divider"></div>
+      <div class="pricing-features">
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Bis zu 20 bearbeitete Fotos</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> 1 Shooting-Tag (bis 2h)</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Lieferung in 48h</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Download via Link</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> 1 Korrekturschleife</div>
+      </div>
+      <button class="btn-pricing" onclick="document.querySelector('#contact').scrollIntoView({behavior:'smooth'})">Anfragen</button>
+    </div>
+    <div class="pricing-card featured reveal d2">
+      <div class="pricing-badge">Beliebt</div>
+      <div class="pricing-tier">Professional</div>
+      <div class="pricing-name">Business Paket</div>
+      <div class="pricing-price">ab €499<small> / Projekt</small></div>
+      <div class="p-divider"></div>
+      <div class="pricing-features">
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Bis zu 60 bearbeitete Fotos</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> 1 Shooting-Tag (bis 5h)</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Video bis 90 Sek. (optional)</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Drohnenaufnahmen inkl.</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Lieferung in 48h</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> 2 Korrekturschleifen</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Persönliche Beratung</div>
+      </div>
+      <button class="btn-pricing" onclick="document.querySelector('#contact').scrollIntoView({behavior:'smooth'})">Anfragen</button>
+    </div>
+    <div class="pricing-card reveal d3">
+      <div class="pricing-tier">Enterprise</div>
+      <div class="pricing-name">Komplett Paket</div>
+      <div class="pricing-price">auf <small>Anfrage</small></div>
+      <div class="p-divider"></div>
+      <div class="pricing-features">
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Unbegrenzte Fotos</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Mehrtägige Produktion</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Imagefilm (2–5 Min.)</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Social Media Content-Paket</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Dedizierter Ansprechpartner</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Priority Lieferung in 24h</div>
+        <div class="pricing-feature"><i class="fa-solid fa-check"></i> Unlimitierte Revisionen</div>
+      </div>
+      <button class="btn-pricing" onclick="document.querySelector('#contact').scrollIntoView({behavior:'smooth'})">Anfragen</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-tag reveal" style="color:var(--gold-l)">Kontakt</div>
+  <h2 class="section-title light reveal d1">Lassen Sie uns <em>sprechen.</em></h2>
+  <div class="contact-grid">
+    <div class="contact-info">
+      <div class="contact-item reveal d1"><div class="c-icon"><i class="fa-solid fa-globe"></i></div><div><div class="c-label">Website</div><div class="c-value">www.bivi.at</div></div></div>
+      <div class="contact-item reveal d2"><div class="c-icon"><i class="fa-solid fa-envelope"></i></div><div><div class="c-label">E-Mail</div><div class="c-value">hallo@bivi.at</div></div></div>
+      <div class="contact-item reveal d3"><div class="c-icon"><i class="fa-solid fa-phone"></i></div><div><div class="c-label">Telefon</div><div class="c-value">+43 1 234 56 78</div></div></div>
+      <div class="contact-item reveal d4"><div class="c-icon"><i class="fa-solid fa-location-dot"></i></div><div><div class="c-label">Standort</div><div class="c-value">Wien, Österreich</div></div></div>
+      <div class="contact-item reveal d5"><div class="c-icon"><i class="fa-brands fa-instagram"></i></div><div><div class="c-label">Instagram</div><div class="c-value">@bivi.at</div></div></div>
+    </div>
+    <div>
+      <div id="contactForm" class="contact-form reveal d2">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Vorname</label><input type="text" class="form-input" placeholder="Max" id="fname"/></div>
+          <div class="form-group"><label class="form-label">Nachname</label><input type="text" class="form-input" placeholder="Mustermann" id="lname"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">E-Mail Adresse</label><input type="email" class="form-input" placeholder="max@musterfirma.at" id="email"/></div>
+        <div class="form-group"><label class="form-label">Unternehmen (optional)</label><input type="text" class="form-input" placeholder="Musterfirma GmbH" id="company"/></div>
+        <div class="form-group">
+          <label class="form-label">Gewünschte Leistung</label>
+          <select class="form-select form-input" id="service">
+            <option value="">Bitte wählen...</option>
+            <option>Immobilienfotografie</option>
+            <option>Immobilienvideo</option>
+            <option>Imagefilm / Werbevideo</option>
+            <option>Produktfotografie</option>
+            <option>Drohnenaufnahmen</option>
+            <option>Social Media Content</option>
+            <option>Event- / Corporatefotografie</option>
+            <option>Individuelles Paket</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Ihre Nachricht</label><textarea class="form-textarea form-input" placeholder="Erzählen Sie uns von Ihrem Projekt..." id="message"></textarea></div>
+        <button class="form-submit" onclick="submitForm()"><i class="fa-regular fa-paper-plane"></i> Nachricht absenden</button>
+      </div>
+      <div class="form-success" id="formSuccess">
+        <i class="fa-solid fa-circle-check"></i>
+        <h3>Vielen Dank!</h3>
+        <p>Wir haben Ihre Nachricht erhalten und melden uns innerhalb von 24 Stunden. Wir freuen uns auf das Gespräch!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="https://bivi.at" class="nav-logo">BI<span>VI</span></a>
+      <p>Professionelle Foto- &amp; Videoproduktion für Wiener Unternehmen. Kreativ, verlässlich, persönlich.</p>
+      <div class="footer-social">
+        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+      </div>
+    </div>
+    <div class="footer-col"><h4>Leistungen</h4><ul><li><a href="#services">Immobilienfotografie</a></li><li><a href="#services">Imagefilm</a></li><li><a href="#services">Drohnenaufnahmen</a></li><li><a href="#services">Produktfotografie</a></li><li><a href="#services">Social Media</a></li><li><a href="#services">Events</a></li></ul></div>
+    <div class="footer-col"><h4>Unternehmen</h4><ul><li><a href="#about">Über uns</a></li><li><a href="#portfolio">Portfolio</a></li><li><a href="#process">Unser Ablauf</a></li><li><a href="#pricing">Preise</a></li><li><a href="#testimonials">Kundenstimmen</a></li></ul></div>
+    <div class="footer-col"><h4>Kontakt</h4><ul><li><a href="https://bivi.at">bivi.at</a></li><li><a href="mailto:hallo@bivi.at">hallo@bivi.at</a></li><li><a href="tel:+4312345678">+43 1 234 56 78</a></li><li><a href="#contact">Anfrage stellen</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 BIVI – Bilder &amp; Videos · bivi.at · Alle Rechte vorbehalten.</p>
+    <div class="footer-bottom-links"><a href="#">Impressum</a><a href="#">Datenschutz</a><a href="#">AGB</a></div>
+  </div>
+</footer>
+
+<script>
+/* ── LOADER ── */
+window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('hidden'),1800));
+
+/* ── NAV ── */
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>60));
+
+/* ── MOBILE NAV ── */
+function toggleMobile(){document.getElementById('mobileNav').classList.toggle('open');}
+function closeMobile(){document.getElementById('mobileNav').classList.remove('open');}
+
+/* ── PARALLAX ── */
+window.addEventListener('scroll',()=>{const el=document.querySelector('.hero-bg');if(el)el.style.transform=`translateY(${scrollY*.3}px)`;});
+
+/* ── SCROLL REVEAL ── */
+const revEls=document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale');
+new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.12,rootMargin:'0px 0px -40px 0px'}).observe=function(el){return IntersectionObserver.prototype.observe.call(this,el);};;
+const revObs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+revEls.forEach(el=>revObs.observe(el));
+
+/* ── COUNTER ── */
+const whyObs=new IntersectionObserver(entries=>{
+  if(!entries[0].isIntersecting)return;
+  document.querySelectorAll('.why-big-num').forEach(el=>{
+    const m=el.innerHTML.match(/(\d+)/);if(!m)return;
+    const t=+m[1],orig=el.innerHTML;let c=0;
+    const tmr=setInterval(()=>{c=Math.min(c+t/40,t);el.innerHTML=orig.replace(/\d+/,Math.round(c));if(c>=t)clearInterval(tmr);},30);
+  });
+  whyObs.disconnect();
+},{threshold:.3});
+const whySec=document.getElementById('why');if(whySec)whyObs.observe(whySec);
+
+/* ════════════════════════════
+   SHOWREEL VIDEO
+════════════════════════════ */
+const vid=document.getElementById('showreelVideo');
+const poster=document.getElementById('showreelPoster');
+const vcProg=document.getElementById('vcProgress');
+const vcTime=document.getElementById('vcTime');
+const vcPP=document.getElementById('vcPlayPause');
+const vcMIcon=document.getElementById('vcMuteIcon');
+
+function playShowreel(){vid.play();poster.classList.add('hidden');}
+function toggleVideoPlay(){
+  if(vid.paused){vid.play();vcPP.innerHTML='<i class="fa-solid fa-pause"></i>';}
+  else{vid.pause();vcPP.innerHTML='<i class="fa-solid fa-play"></i>';}
+}
+function toggleMute(){vid.muted=!vid.muted;vcMIcon.className=vid.muted?'fa-solid fa-volume-xmark':'fa-solid fa-volume-high';}
+function toggleFullscreen(){
+  const w=document.querySelector('.showreel-wrapper');
+  if(!document.fullscreenElement)w.requestFullscreen();else document.exitFullscreen();
+}
+function seekVideo(e){const r=e.offsetX/e.currentTarget.offsetWidth;vid.currentTime=r*vid.duration;}
+vid.addEventListener('timeupdate',()=>{
+  if(!vid.duration)return;
+  vcProg.style.width=(vid.currentTime/vid.duration*100)+'%';
+  const m=Math.floor(vid.currentTime/60),s=Math.floor(vid.currentTime%60).toString().padStart(2,'0');
+  vcTime.textContent=`${m}:${s}`;
+});
+vid.addEventListener('ended',()=>{poster.classList.remove('hidden');vcPP.innerHTML='<i class="fa-solid fa-play"></i>';});
+vid.addEventListener('play',()=>vcPP.innerHTML='<i class="fa-solid fa-pause"></i>');
+vid.addEventListener('pause',()=>vcPP.innerHTML='<i class="fa-solid fa-play"></i>');
+
+/* ════════════════════════════
+   3D SERVICES CAROUSEL
+════════════════════════════ */
+const SLIDES=[
+  {cat:'Immobilien',name:'Immobilienfotografie',desc:'Innen- &amp; Außenaufnahmen, die Ihr Objekt optimal präsentieren.',icon:'fa-solid fa-building',g:'linear-gradient(135deg,#2a3825,#1a2618)'},
+  {cat:'Video',name:'Imagefilm &amp; Werbevideo',desc:'Cineastische Videos, die Ihre Marke emotional inszenieren.',icon:'fa-solid fa-video',g:'linear-gradient(135deg,#3a4e35,#253320)'},
+  {cat:'Drohne',name:'Drohnenaufnahmen 4K',desc:'Atemberaubende Luftaufnahmen, lizenziert &amp; versichert.',icon:'fa-solid fa-drone',g:'linear-gradient(135deg,#1e2a1a,#31402C)'},
+  {cat:'Produkt',name:'Produktfotografie',desc:'Studio-Aufnahmen für Webshops, Kataloge und Werbematerial.',icon:'fa-solid fa-box-open',g:'linear-gradient(135deg,#4a6042,#2a3825)'},
+  {cat:'Social',name:'Social Media Content',desc:'Reels, Stories &amp; Posts optimiert für Instagram und TikTok.',icon:'fa-brands fa-instagram',g:'linear-gradient(135deg,#263520,#31402C)'},
+  {cat:'Event',name:'Event &amp; Corporate',desc:'Professionelle Dokumentation von Events, Messen &amp; Konferenzen.',icon:'fa-solid fa-users',g:'linear-gradient(135deg,#31402C,#1a2618)'},
+];
+let cur=0;
+const track=document.getElementById('carouselTrack');
+const dotsEl=document.getElementById('carouselDots');
+
+function buildCarousel(){
+  track.innerHTML='';dotsEl.innerHTML='';
+  SLIDES.forEach((s,i)=>{
+    const el=document.createElement('div');
+    el.className='carousel-slide';
+    el.innerHTML=`<div class="slide-top" style="background:${s.g}"><i class="${s.icon}"></i></div><div class="slide-info"><div class="slide-cat">${s.cat}</div><div class="slide-name">${s.name}</div><div class="slide-desc">${s.desc}</div></div>`;
+    el.addEventListener('click',()=>setSlide(i));
+    track.appendChild(el);
+    const d=document.createElement('div');
+    d.className='carousel-dot'+(i===0?' active':'');
+    d.addEventListener('click',()=>setSlide(i));
+    dotsEl.appendChild(d);
+  });
+  positionSlides();
+}
+function positionSlides(){
+  const all=track.querySelectorAll('.carousel-slide');
+  const N=SLIDES.length;
+  const GAP=320;
+  all.forEach((el,i)=>{
+    const off=i-cur;
+    const wOff=((off+N+Math.floor(N/2))%N)-Math.floor(N/2);
+    const absW=Math.abs(wOff);
+    const x=wOff*GAP;
+    const scale=absW===0?1:absW===1?.8:.65;
+    const ry=wOff*-10;
+    const op=absW>2?0:absW===2?.35:1;
+    const bright=absW===0?1:absW===1?.65:.45;
+    const zi=N-absW;
+    el.style.cssText=`left:50%;top:50%;margin-left:-140px;transform:translate(${x}px,-50%) scale(${scale}) rotateY(${ry}deg);z-index:${zi};opacity:${op};filter:brightness(${bright});pointer-events:${absW>1?'none':'auto'};`;
+  });
+  dotsEl.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===cur));
+}
+function setSlide(i){cur=(i+SLIDES.length)%SLIDES.length;positionSlides();}
+function carouselNext(){setSlide(cur+1);}
+function carouselPrev(){setSlide(cur-1);}
+// touch
+let tx=0;
+track.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+track.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(dx<-40)carouselNext();else if(dx>40)carouselPrev();});
+// keyboard
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')carouselNext();if(e.key==='ArrowLeft')carouselPrev();});
+// auto
+let auto=setInterval(carouselNext,4200);
+track.addEventListener('mouseenter',()=>clearInterval(auto));
+track.addEventListener('mouseleave',()=>{auto=setInterval(carouselNext,4200);});
+buildCarousel();
+
+/* ════════════════════════════
+   PORTFOLIO FILTER
+════════════════════════════ */
+const filterBtns=document.querySelectorAll('.filter-btn');
+const pItems=document.querySelectorAll('.portfolio-item');
+
+// Layout config: [span class, rowspan]  for "all" view
+const allLayouts=['span-7','span-5','span-5','span-4','span-4','span-4','span-4','span-4'];
+const allRows=[2,1,1,1,1,1,1,1];
+
+function applyAllLayout(){
+  const vis=[...pItems].filter(it=>!it.classList.contains('hidden'));
+  vis.forEach((item,i)=>{
+    item.classList.remove('span-4','span-5','span-6','span-7','span-12');
+    item.style.gridRow='';
+    item.classList.add(allLayouts[i]||'span-4');
+    if(allRows[i]&&allRows[i]>1)item.style.gridRow=`span ${allRows[i]}`;
+  });
+}
+
+function applyFilteredLayout(vis){
+  vis.forEach(item=>{
+    item.classList.remove('span-4','span-5','span-6','span-7','span-12');
+    item.style.gridRow='';
+    if(vis.length===1)item.classList.add('span-7');
+    else if(vis.length===2)item.classList.add('span-6');
+    else item.classList.add('span-4');
+  });
+}
+
+filterBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    filterBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const f=btn.dataset.filter;
+    if(f==='all'){
+      pItems.forEach(it=>it.classList.remove('hidden'));
+      applyAllLayout();
+    } else {
+      const vis=[];
+      pItems.forEach(it=>{
+        if(it.dataset.cat===f){it.classList.remove('hidden');vis.push(it);}
+        else it.classList.add('hidden');
+      });
+      applyFilteredLayout(vis);
+    }
+  });
+});
+// init
+applyAllLayout();
+
+/* ════════════════════════════
+   LIGHTBOX
+════════════════════════════ */
+const lbDescMap={
+  'Immobilien':'Hochwertige Innen- und Außenaufnahmen, die das Objekt optimal präsentieren und echte Kaufinteressenten ansprechen.',
+  'Werbung':'Professionell produzierter Imagefilm mit Storyboard, Schnitt und Color Grading – bereit für alle Social-Media-Plattformen.',
+  'Drohne':'Lizenzierte Luftaufnahmen in 4K-Qualität, die das Objekt und seine Umgebung aus einer beeindruckenden Perspektive zeigen.',
+  'Produkt':'Studioaufnahmen, die das Produkt in Szene setzen und auf E-Commerce-Plattformen zu höheren Verkaufszahlen führen.',
+  'Event':'Authentische und diskrete Eventdokumentation – alle wichtigen Momente festgehalten, ohne den Ablauf zu stören.',
+};
+const bgMap={g1:'linear-gradient(135deg,#2a3825,#1a2618)',g2:'linear-gradient(135deg,#3a4e35,#253320)',g3:'linear-gradient(135deg,#1e2a1a,#31402C)',g4:'linear-gradient(135deg,#4a6042,#2a3825)',g5:'linear-gradient(135deg,#263520,#31402C)',g6:'linear-gradient(135deg,#31402C,#1a2618)',g7:'linear-gradient(135deg,#1a3020,#31402C)',g8:'linear-gradient(135deg,#2c3d28,#192214)'};
+
+function openLightbox(item){
+  const cat=item.querySelector('.p-cat').textContent;
+  const name=item.querySelector('.p-name').textContent;
+  const iconEl=item.querySelector('.p-bg i');
+  const bgClass=[...item.querySelector('.p-bg').classList].find(c=>c.startsWith('g'));
+  document.getElementById('lbImg').style.background=bgMap[bgClass]||'#31402C';
+  document.getElementById('lbImg').innerHTML=`<i class="${iconEl.className}" style="font-size:4rem;color:rgba(255,255,255,.15)"></i>`;
+  document.getElementById('lbCat').textContent=cat;
+  document.getElementById('lbTitle').textContent=name;
+  document.getElementById('lbDesc').textContent=lbDescMap[cat]||'Professionell produzierter Content von BIVI – Bilder & Videos Wien.';
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');document.body.style.overflow='';}
+function lbBgClick(e){if(e.target===document.getElementById('lightbox'))closeLightbox();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+
+/* ── FORM ── */
+function submitForm(){
+  if(!document.getElementById('fname').value||!document.getElementById('email').value||!document.getElementById('service').value){alert('Bitte füllen Sie zumindest Vorname, E-Mail und gewünschte Leistung aus.');return;}
+  document.getElementById('contactForm').style.display='none';
+  document.getElementById('formSuccess').style.display='block';
+}
+</script>
+</body>
+</html>
